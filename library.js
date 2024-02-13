@@ -30,6 +30,7 @@ const profileFields = [
 	'birthday',
 	'signature',
 	'aboutme',
+	'did',
 ];
 const payloadKeys = profileFields.concat([
 	'id', // the uniq identifier of that account
@@ -122,7 +123,7 @@ plugin.getUser = async (remoteId) => {
 		return;
 	}
 
-	return user.getUserFields(uid, ['username', 'userslug', 'picture']);
+	return user.getUserFields(uid, ['username', 'userslug', 'picture', 'did']);
 };
 
 plugin.process = async (token) => {
