@@ -65,7 +65,7 @@ plugin.init = async (params) => {
 
 	router.get('/admin/plugins/session-sharing', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/session-sharing', controllers.renderAdminPage);
-	router.get('/api/session-sharing/auth-redirect', controllers.jwtAuthRedirect);
+	router.get('/api/session-sharing/px.png', controllers.authPixel);
 	router.get('/api/session-sharing/lookup', controllers.retrieveUser);
 	router.post('/api/session-sharing/user', controllers.process);
 
