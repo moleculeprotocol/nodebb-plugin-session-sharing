@@ -72,7 +72,7 @@ plugin.init = async (params) => {
 	router.get('/api/session-sharing/jwtAuth', controllers.jwtAuth);
 	router.get('/api/session-sharing/lookup', controllers.retrieveUser);
 	router.post('/api/session-sharing/user', controllers.process);
-
+	router.get('/api/session-sharing/groups/:slug/chat', controllers.getChatRoomByGroup);
 	if (process.env.NODE_ENV === 'development') {
 		router.get('/debug/session', plugin.generate);
 	}
@@ -346,6 +346,17 @@ plugin.updateUserChatrooms = async (uid, userData) => {
 			messaging.addUsersToRoom(1, [uid], roomId);
 		}
 	});
+};
+
+plugin.getChatroomForGroup = async (slug) => {
+	const result = await db.client.collection('objects')
+		.findOne({
+			_key: {
+				$regex: '^chat:room:\\d+$' },
+			groups: '["' + slug + '"]',
+		}, { _id: false });
+
+	return result;
 };
 
 async function executeJoinLeave(uid, join, leave) {
