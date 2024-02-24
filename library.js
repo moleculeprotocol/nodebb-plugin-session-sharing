@@ -11,6 +11,8 @@ const jwt = require('jsonwebtoken');
 const meta = require.main.require('./src/meta');
 const user = require.main.require('./src/user');
 const groups = require.main.require('./src/groups');
+const messaging = require.main.require('./src/messaging');
+
 const SocketPlugins = require.main.require('./src/socket.io/plugins');
 const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
@@ -38,6 +40,7 @@ const payloadKeys = profileFields.concat([
 	'lastName', // dto.
 	'picture',
 	'groups',
+	'chatrooms',
 ]);
 
 const plugin = {
@@ -133,6 +136,7 @@ plugin.process = async (token) => {
 	const [uid, isNewUser] = await plugin.findOrCreateUser(userData);
 	await plugin.updateUserProfile(uid, userData, isNewUser);
 	await plugin.updateUserGroups(uid, userData);
+	await plugin.updateUserChatrooms(uid, userData);
 	await plugin.verifyUser(token, uid, isNewUser);
 	return uid;
 };
@@ -177,6 +181,11 @@ plugin.normalizePayload = async (payload) => {
 
 	if (userData.hasOwnProperty('groups') && !Array.isArray(userData.groups)) {
 		winston.warn('[session-sharing] Array expected for `groups` in JWT payload. Ignoring.');
+		delete userData.groups;
+	}
+
+	if (userData.hasOwnProperty('chatrooms') && !Array.isArray(userData.chatrooms)) {
+		winston.warn('[session-sharing] Array expected for `chatrooms` in JWT payload. Ignoring.');
 		delete userData.groups;
 	}
 
@@ -324,6 +333,19 @@ plugin.updateUserGroups = async (uid, userData) => {
 	}
 
 	await executeJoinLeave(uid, join, leave);
+};
+
+plugin.updateUserChatrooms = async (uid, userData) => {
+	if (!userData.chatrooms || !Array.isArray(userData.chatrooms)) {
+		return;
+	}
+
+
+	userData.chatrooms.forEach((roomId) => {
+		if (!messaging.isUserInRoom(uid, roomId)) {
+			messaging.addUsersToRoom(1, [uid], roomId);
+		}
+	});
 };
 
 async function executeJoinLeave(uid, join, leave) {
