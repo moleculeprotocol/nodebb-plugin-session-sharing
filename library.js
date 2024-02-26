@@ -341,8 +341,8 @@ plugin.updateUserChatrooms = async (uid, userData) => {
 	}
 
 
-	userData.chatrooms.forEach((roomId) => {
-		if (!messaging.isUserInRoom(uid, roomId)) {
+	userData.chatrooms.forEach(async (roomId) => {
+		if (!await messaging.isUserInRoom(uid, roomId)) {
 			messaging.addUsersToRoom(1, [uid], roomId);
 		}
 	});
